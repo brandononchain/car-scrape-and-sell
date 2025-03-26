@@ -1,10 +1,9 @@
-
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Clock, RefreshCw, ArrowRight } from 'lucide-react';
+import { Globe, Clock, RefreshCw, ArrowRight } from 'lucide-react';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -75,6 +74,7 @@ export function ScrapeForm({ onSubmit, isLoading = false }: ScrapeFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-primary" />
                   Dealership URL
                 </FormLabel>
                 <FormControl>
