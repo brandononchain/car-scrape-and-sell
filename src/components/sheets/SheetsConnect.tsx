@@ -1,10 +1,12 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileSpreadsheet, Link2, Unlink, ExternalLink, Check, X } from 'lucide-react';
+import { FileSpreadsheet, Link2, Unlink, ExternalLink, Check, X, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { type SheetInfo } from '@/types';
+import { initiateGoogleAuth, disconnectGoogle } from '@/services/authService';
+import { useToast } from '@/components/ui/use-toast';
 
 interface SheetsConnectProps {
   sheetInfo: SheetInfo | null;
@@ -13,20 +15,86 @@ interface SheetsConnectProps {
 }
 
 export function SheetsConnect({ sheetInfo, onConnect, onDisconnect }: SheetsConnectProps) {
+  const { toast } = useToast();
   const [sheetId, setSheetId] = useState('');
   const [isConnecting, setIsConnecting] = useState(false);
   
-  const handleConnect = () => {
-    if (!sheetId) return;
+  const handleConnect = async () => {
+    if (!sheetId) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter a Google Sheet ID",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsConnecting(true);
     
-    // Simulate API connection
-    setTimeout(() => {
-      onConnect(sheetId);
+    try {
+      // Get auth URL from backend
+      const { authUrl } = await initiateGoogleAuth();
+      
+      // Add sheet ID as state parameter to auth URL
+      const authUrlWithState = `${authUrl}&state=${encodeURIComponent(sheetId)}`;
+      
+      // Open popup for OAuth flow
+      const width = 600;
+      const height = 700;
+      const left = window.screenX + (window.outerWidth - width) / 2;
+      const top = window.screenY + (window.outerHeight - height) / 2;
+      
+      const popup = window.open(
+        authUrlWithState,
+        'google-auth',
+        `width=${width},height=${height},left=${left},top=${top}`
+      );
+      
+      // Poll for auth completion
+      const checkClosed = setInterval(() => {
+        if (popup?.closed) {
+          clearInterval(checkClosed);
+          onConnect(sheetId); // Pass the sheet ID to parent
+          setIsConnecting(false);
+          setSheetId('');
+        }
+      }, 500);
+    } catch (error) {
+      console.error('Google connect error:', error);
+      toast({
+        title: "Connection Failed",
+        description: "Could not connect to Google Sheets. Please try again.",
+        variant: "destructive",
+      });
       setIsConnecting(false);
-      setSheetId('');
-    }, 1500);
+    }
+  };
+  
+  const handleDisconnect = async () => {
+    try {
+      const success = await disconnectGoogle();
+      
+      if (success) {
+        onDisconnect();
+        toast({
+          title: "Disconnected",
+          description: "Successfully disconnected from Google Sheets.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to disconnect. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Google disconnect error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to disconnect. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
   
   return (
@@ -80,7 +148,7 @@ export function SheetsConnect({ sheetInfo, onConnect, onDisconnect }: SheetsConn
             <Button 
               variant="outline" 
               className="w-full text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30"
-              onClick={onDisconnect}
+              onClick={handleDisconnect}
             >
               <Unlink className="w-4 h-4 mr-2" />
               Disconnect Sheet
@@ -109,7 +177,7 @@ export function SheetsConnect({ sheetInfo, onConnect, onDisconnect }: SheetsConn
               >
                 {isConnecting ? (
                   <>
-                    <FileSpreadsheet className="w-4 h-4 mr-2 animate-pulse" />
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
                     Connecting...
                   </>
                 ) : (

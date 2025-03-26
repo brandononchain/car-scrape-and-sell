@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Header } from '@/components/layout/Header';
 import { Container } from '@/components/layout/Container';
@@ -11,6 +11,7 @@ import { FacebookConnect } from '@/components/facebook/FacebookConnect';
 import { useScraper } from '@/hooks/useScraper';
 import { type SheetInfo, type FacebookAuth, type ScraperConfig } from '@/types';
 import { useToast } from '@/components/ui/use-toast';
+import { getFacebookAuthStatus, getGoogleAuthStatus } from '@/services/authService';
 
 const Index = () => {
   const { toast } = useToast();
@@ -27,6 +28,38 @@ const Index = () => {
   
   const [sheetInfo, setSheetInfo] = useState<SheetInfo | null>(null);
   const [fbAuth, setFbAuth] = useState<FacebookAuth | null>(null);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
+  
+  // Check authentication status on load
+  useEffect(() => {
+    const checkAuth = async () => {
+      setIsLoadingAuth(true);
+      
+      try {
+        // Check Facebook auth status
+        const fbStatus = await getFacebookAuthStatus();
+        setFbAuth(fbStatus);
+        
+        // Check Google auth status
+        const isGoogleConnected = await getGoogleAuthStatus();
+        
+        if (isGoogleConnected && config.sheetsId) {
+          setSheetInfo({
+            id: config.sheetsId,
+            name: 'Auto Scraper Data',
+            url: `https://docs.google.com/spreadsheets/d/${config.sheetsId}`,
+            lastUpdated: new Date().toISOString(),
+          });
+        }
+      } catch (error) {
+        console.error('Error checking auth status:', error);
+      } finally {
+        setIsLoadingAuth(false);
+      }
+    };
+    
+    checkAuth();
+  }, []);
   
   // Connect to Google Sheets
   const handleConnectSheet = (sheetId: string) => {
@@ -60,18 +93,17 @@ const Index = () => {
   };
   
   // Connect to Facebook
-  const handleConnectFacebook = () => {
-    // In a real app, this would involve OAuth flow with Facebook
-    setFbAuth({
-      isConnected: true,
-      pageId: 'fb_page_123',
-      pageName: 'Your Auto Business',
-    });
+  const handleConnectFacebook = async () => {
+    // Refresh auth status after connection
+    const updatedFbStatus = await getFacebookAuthStatus();
+    setFbAuth(updatedFbStatus);
     
-    toast({
-      title: 'Connected to Facebook',
-      description: 'You can now publish listings to Facebook Marketplace',
-    });
+    if (updatedFbStatus.isConnected) {
+      toast({
+        title: 'Connected to Facebook',
+        description: 'You can now publish listings to Facebook Marketplace',
+      });
+    }
   };
   
   // Disconnect from Facebook
@@ -128,7 +160,18 @@ const Index = () => {
       return false;
     }
     
-    return await publishListing(carId);
+    try {
+      const success = await publishListing(carId);
+      return success;
+    } catch (error) {
+      console.error('Error publishing to Facebook:', error);
+      toast({
+        title: 'Publishing Failed',
+        description: 'An error occurred while publishing to Facebook',
+        variant: 'destructive',
+      });
+      return false;
+    }
   };
   
   return (
@@ -184,7 +227,7 @@ const Index = () => {
             
             <CarList 
               cars={cars} 
-              isLoading={isLoading} 
+              isLoading={isLoading || isLoadingAuth} 
               onPublishToFB={fbAuth?.isConnected ? handlePublishToFB : undefined}
             />
           </div>

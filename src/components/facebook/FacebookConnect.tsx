@@ -1,9 +1,11 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Facebook, Link2, Unlink, Check, X, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { type FacebookAuth } from '@/types';
+import { initiateFacebookAuth, disconnectFacebook } from '@/services/authService';
+import { useToast } from '@/components/ui/use-toast';
 
 interface FacebookConnectProps {
   auth: FacebookAuth | null;
@@ -12,16 +14,72 @@ interface FacebookConnectProps {
 }
 
 export function FacebookConnect({ auth, onConnect, onDisconnect }: FacebookConnectProps) {
+  const { toast } = useToast();
   const [isConnecting, setIsConnecting] = useState(false);
   
-  const handleConnect = () => {
+  const handleConnect = async () => {
     setIsConnecting(true);
     
-    // Simulate API connection
-    setTimeout(() => {
-      onConnect();
+    try {
+      // Get auth URL from backend
+      const { authUrl } = await initiateFacebookAuth();
+      
+      // Open popup for OAuth flow
+      const width = 600;
+      const height = 700;
+      const left = window.screenX + (window.outerWidth - width) / 2;
+      const top = window.screenY + (window.outerHeight - height) / 2;
+      
+      const popup = window.open(
+        authUrl,
+        'facebook-auth',
+        `width=${width},height=${height},left=${left},top=${top}`
+      );
+      
+      // Poll for auth completion
+      const checkClosed = setInterval(() => {
+        if (popup?.closed) {
+          clearInterval(checkClosed);
+          onConnect(); // Trigger parent to check auth status
+          setIsConnecting(false);
+        }
+      }, 500);
+    } catch (error) {
+      console.error('Facebook connect error:', error);
+      toast({
+        title: "Connection Failed",
+        description: "Could not connect to Facebook. Please try again.",
+        variant: "destructive",
+      });
       setIsConnecting(false);
-    }, 1500);
+    }
+  };
+  
+  const handleDisconnect = async () => {
+    try {
+      const success = await disconnectFacebook();
+      
+      if (success) {
+        onDisconnect();
+        toast({
+          title: "Disconnected",
+          description: "Successfully disconnected from Facebook.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to disconnect. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Facebook disconnect error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to disconnect. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
   
   return (
@@ -68,7 +126,7 @@ export function FacebookConnect({ auth, onConnect, onDisconnect }: FacebookConne
             <Button 
               variant="outline" 
               className="w-full text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30"
-              onClick={onDisconnect}
+              onClick={handleDisconnect}
             >
               <Unlink className="w-4 h-4 mr-2" />
               Disconnect Facebook
