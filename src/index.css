@@ -181,15 +181,15 @@
 
   /* Toggle switch card */
   .toggle-card {
-    @apply flex flex-col p-5 rounded-lg border border-border bg-background relative h-44;
+    @apply flex flex-col p-5 rounded-lg border border-border bg-background;
   }
 
   .toggle-card-header {
-    @apply space-y-1.5;
+    @apply space-y-1.5 mb-3;
   }
 
   .toggle-card-footer {
-    @apply absolute bottom-5 right-5;
+    @apply flex justify-end mt-auto pt-3;
   }
 }
 
