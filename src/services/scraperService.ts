@@ -68,7 +68,7 @@ export async function scrapeWebsite(config: ScraperConfig): Promise<{
       fuelType: ['Gasoline', 'Diesel', 'Hybrid', 'Electric'][rand(0, 4)],
       transmission: ['Automatic', 'Manual'][rand(0, 2)],
       drivetrain: ['FWD', 'RWD', 'AWD', '4WD'][rand(0, 4)],
-      engineSize: [`${rand(1, 6)}.${rand(0, 10)}L`],
+      engineSize: `${rand(1, 6)}.${rand(0, 10)}L`, // Fixed: Changed from string[] to string
       description: `This ${year} ${make} ${model} is in excellent condition with only ${mileage} miles.`,
       features: ['Bluetooth', 'Backup Camera', 'Leather Seats', 'Navigation', 'Sunroof'].slice(0, rand(1, 6)),
       images: [

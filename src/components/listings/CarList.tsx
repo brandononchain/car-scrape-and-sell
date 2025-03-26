@@ -62,13 +62,17 @@ export function CarList({ cars, isLoading = false, onPublishToFB }: CarListProps
   };
   
   // Handle publishing to Facebook with loading state
-  const handlePublish = async (carId: string) => {
-    if (!onPublishToFB) return;
+  const handlePublish = async (carId: string): Promise<boolean> => {
+    if (!onPublishToFB) return false;
     
     setPublishingIds(prev => new Set(prev).add(carId));
     
     try {
-      await onPublishToFB(carId);
+      const result = await onPublishToFB(carId);
+      return result;
+    } catch (error) {
+      console.error("Error publishing to Facebook:", error);
+      return false;
     } finally {
       setPublishingIds(prev => {
         const next = new Set(prev);
