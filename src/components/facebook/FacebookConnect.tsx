@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Facebook, Link2, LinkBreak, Check, X, RefreshCw } from 'lucide-react';
+import { Facebook, Link2, Unlink, Check, X, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { type FacebookAuth } from '@/types';
 
@@ -70,7 +70,7 @@ export function FacebookConnect({ auth, onConnect, onDisconnect }: FacebookConne
               className="w-full text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30"
               onClick={onDisconnect}
             >
-              <LinkBreak className="w-4 h-4 mr-2" />
+              <Unlink className="w-4 h-4 mr-2" />
               Disconnect Facebook
             </Button>
           </div>

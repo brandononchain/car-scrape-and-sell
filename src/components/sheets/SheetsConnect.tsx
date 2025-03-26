@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileSpreadsheet, Link2, LinkBreak, ExternalLink, Check, X } from 'lucide-react';
+import { FileSpreadsheet, Link2, Unlink, ExternalLink, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { type SheetInfo } from '@/types';
@@ -82,7 +82,7 @@ export function SheetsConnect({ sheetInfo, onConnect, onDisconnect }: SheetsConn
               className="w-full text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30"
               onClick={onDisconnect}
             >
-              <LinkBreak className="w-4 h-4 mr-2" />
+              <Unlink className="w-4 h-4 mr-2" />
               Disconnect Sheet
             </Button>
           </div>
