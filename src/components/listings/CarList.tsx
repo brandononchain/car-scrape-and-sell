@@ -11,13 +11,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 interface CarListProps {
   cars: CarListing[];
   isLoading?: boolean;
+  onPublishToFB?: (carId: string) => Promise<boolean>;
 }
 
-export function CarList({ cars, isLoading = false }: CarListProps) {
+export function CarList({ cars, isLoading = false, onPublishToFB }: CarListProps) {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('dateScraped');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [publishingIds, setPublishingIds] = useState<Set<string>>(new Set());
   
   // Filter cars based on search and status filter
   const filteredCars = cars.filter(car => {
@@ -57,6 +59,23 @@ export function CarList({ cars, isLoading = false }: CarListProps) {
   // Toggle sort order
   const toggleSortOrder = () => {
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+  };
+  
+  // Handle publishing to Facebook with loading state
+  const handlePublish = async (carId: string) => {
+    if (!onPublishToFB) return;
+    
+    setPublishingIds(prev => new Set(prev).add(carId));
+    
+    try {
+      await onPublishToFB(carId);
+    } finally {
+      setPublishingIds(prev => {
+        const next = new Set(prev);
+        next.delete(carId);
+        return next;
+      });
+    }
   };
   
   return (
@@ -157,7 +176,8 @@ export function CarList({ cars, isLoading = false }: CarListProps) {
               <CarCard 
                 key={car.id} 
                 car={car} 
-                onPublishToFB={() => console.log('Publish to FB:', car.id)}
+                onPublishToFB={onPublishToFB ? handlePublish : undefined}
+                isPublishing={publishingIds.has(car.id)}
               />
             ))}
           </div>

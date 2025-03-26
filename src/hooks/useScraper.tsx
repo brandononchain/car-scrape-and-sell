@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { 
   type CarListing, 
@@ -5,12 +6,20 @@ import {
   type ScraperStatus, 
   type ScrapeResult 
 } from '@/types';
+import { 
+  scrapeWebsite, 
+  syncWithGoogleSheets, 
+  publishToFacebook, 
+  getNextScheduledTime 
+} from '@/services/scraperService';
+import { useToast } from "@/components/ui/use-toast";
 
 interface UseScraperProps {
   initialConfig?: Partial<ScraperConfig>;
 }
 
 export function useScraper({ initialConfig }: UseScraperProps = {}) {
+  const { toast } = useToast();
   const [config, setConfig] = useState<ScraperConfig>({
     dealershipUrl: initialConfig?.dealershipUrl || '',
     scheduleFrequency: initialConfig?.scheduleFrequency || 'daily',
@@ -30,86 +39,14 @@ export function useScraper({ initialConfig }: UseScraperProps = {}) {
   const [cars, setCars] = useState<CarListing[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   
-  const sampleCars: CarListing[] = [
-    {
-      id: '1',
-      title: '2019 Toyota Camry XSE V6',
-      price: 25990,
-      year: 2019,
-      make: 'Toyota',
-      model: 'Camry',
-      trim: 'XSE V6',
-      mileage: 32456,
-      exteriorColor: 'Midnight Black',
-      interiorColor: 'Red',
-      fuelType: 'Gasoline',
-      transmission: 'Automatic',
-      drivetrain: 'FWD',
-      engineSize: '3.5L V6',
-      description: 'Low mileage, one owner Toyota Camry XSE with all available options.',
-      features: ['Leather Seats', 'Navigation', 'Panoramic Sunroof', 'Heated Seats'],
-      images: ['https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?q=80&w=2000&auto=format&fit=crop'],
-      dealershipUrl: 'https://example-dealership.com',
-      originalListingUrl: 'https://example-dealership.com/inventory/1',
-      dateScraped: '2023-05-10T14:32:00Z',
-      status: 'active',
-      lastUpdated: '2023-05-10T14:32:00Z',
-    },
-    {
-      id: '2',
-      title: '2020 Honda Accord Sport 2.0T',
-      price: 27850,
-      year: 2020,
-      make: 'Honda',
-      model: 'Accord',
-      trim: 'Sport 2.0T',
-      mileage: 18765,
-      exteriorColor: 'Modern Steel',
-      interiorColor: 'Black',
-      fuelType: 'Gasoline',
-      transmission: 'Automatic',
-      drivetrain: 'FWD',
-      engineSize: '2.0L Turbo',
-      description: 'Certified Pre-Owned Honda Accord Sport with remaining factory warranty.',
-      features: ['Apple CarPlay', 'Android Auto', 'Blind Spot Monitor', 'Lane Keep Assist'],
-      images: ['https://images.unsplash.com/photo-1570733577524-3a047079e80d?q=80&w=2000&auto=format&fit=crop'],
-      dealershipUrl: 'https://example-dealership.com',
-      originalListingUrl: 'https://example-dealership.com/inventory/2',
-      dateScraped: '2023-05-11T09:15:00Z',
-      status: 'new',
-      lastUpdated: '2023-05-11T09:15:00Z',
-    },
-    {
-      id: '3',
-      title: '2018 BMW 540i xDrive',
-      price: 36750,
-      year: 2018,
-      make: 'BMW',
-      model: '540i',
-      trim: 'xDrive',
-      mileage: 45210,
-      exteriorColor: 'Alpine White',
-      interiorColor: 'Cognac',
-      fuelType: 'Gasoline',
-      transmission: 'Automatic',
-      drivetrain: 'AWD',
-      engineSize: '3.0L Turbo',
-      description: 'Executive package BMW 540i with M Sport styling and premium features.',
-      features: ['Heated Steering Wheel', 'Harman Kardon Audio', 'Heads-Up Display', 'Adaptive Cruise Control'],
-      images: ['https://images.unsplash.com/photo-1523983388277-336a66bf9bcd?q=80&w=2000&auto=format&fit=crop'],
-      dealershipUrl: 'https://example-dealership.com',
-      originalListingUrl: 'https://example-dealership.com/inventory/3',
-      dateScraped: '2023-05-08T11:45:00Z',
-      status: 'sold',
-      fbMarketplaceId: 'fb123456',
-      fbMarketplaceUrl: 'https://facebook.com/marketplace/item/123456',
-      lastUpdated: '2023-05-12T16:20:00Z',
-    },
-  ];
-  
-  const simulateScrape = async () => {
+  // This function handles the main scraping process
+  const scrape = async () => {
     if (!config.dealershipUrl) {
-      console.error('Dealership URL is required');
+      toast({
+        title: "Error",
+        description: "Dealership URL is required",
+        variant: "destructive",
+      });
       return;
     }
     
@@ -117,20 +54,80 @@ export function useScraper({ initialConfig }: UseScraperProps = {}) {
     setStatus(prev => ({ ...prev, isScrapingActive: true }));
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Call our scraper service
+      const { listings, result } = await scrapeWebsite(config);
       
-      const newCars = sampleCars.filter(car => !cars.some(c => c.id === car.id));
-      setCars(prev => [...prev, ...newCars]);
+      // Update car listings
+      setCars(prevCars => {
+        // Find new or updated cars
+        const updatedCars = [...prevCars];
+        
+        // Process new listings
+        for (const listing of listings) {
+          const existingIndex = updatedCars.findIndex(car => car.id === listing.id);
+          if (existingIndex >= 0) {
+            // Update existing listing
+            updatedCars[existingIndex] = listing;
+          } else {
+            // Add new listing
+            updatedCars.push(listing);
+          }
+        }
+        
+        return updatedCars;
+      });
       
-      const result: ScrapeResult = {
-        totalFound: sampleCars.length,
-        new: newCars.length,
-        updated: 1,
-        sold: 1,
-        unchanged: sampleCars.length - newCars.length - 1 - 1,
-        timestamp: new Date().toISOString(),
-      };
+      // If Google Sheets integration is enabled, sync the data
+      if (config.sheetsId) {
+        const syncSuccess = await syncWithGoogleSheets(config.sheetsId, listings);
+        if (syncSuccess) {
+          toast({
+            title: "Google Sheets Synced",
+            description: `Successfully synced ${listings.length} listings`,
+          });
+        } else {
+          toast({
+            title: "Google Sheets Sync Failed",
+            description: "Unable to update Google Sheets. Please check your connection.",
+            variant: "destructive",
+          });
+        }
+      }
       
+      // If auto-publish to Facebook is enabled, publish new listings
+      if (config.autoPublishToFb) {
+        const newListings = listings.filter(listing => 
+          listing.status === 'new' && !listing.fbMarketplaceId
+        );
+        
+        if (newListings.length > 0) {
+          toast({
+            title: "Publishing to Facebook",
+            description: `Attempting to publish ${newListings.length} new listings`,
+          });
+          
+          for (const listing of newListings) {
+            const result = await publishToFacebook(listing);
+            if (result.success && result.fbMarketplaceId) {
+              // Update the listing with Facebook info
+              setCars(prevCars => {
+                return prevCars.map(car => {
+                  if (car.id === listing.id) {
+                    return {
+                      ...car,
+                      fbMarketplaceId: result.fbMarketplaceId,
+                      fbMarketplaceUrl: result.fbMarketplaceUrl,
+                    };
+                  }
+                  return car;
+                });
+              });
+            }
+          }
+        }
+      }
+      
+      // Update status
       setStatus({
         isScrapingActive: false,
         lastScraped: new Date().toISOString(),
@@ -142,6 +139,15 @@ export function useScraper({ initialConfig }: UseScraperProps = {}) {
     } catch (error) {
       console.error('Error during scraping:', error);
       
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error during scraping';
+      
+      toast({
+        title: "Scraping Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      
+      // Update with error information
       setStatus(prev => ({
         ...prev,
         isScrapingActive: false,
@@ -151,7 +157,7 @@ export function useScraper({ initialConfig }: UseScraperProps = {}) {
           updated: 0,
           sold: 0,
           unchanged: 0,
-          errors: [(error as Error).message || 'Unknown error during scraping'],
+          errors: [errorMessage],
           timestamp: new Date().toISOString(),
         },
       }));
@@ -162,34 +168,12 @@ export function useScraper({ initialConfig }: UseScraperProps = {}) {
     }
   };
   
-  const getNextScheduledTime = (frequency: ScraperConfig['scheduleFrequency']) => {
-    const now = new Date();
-    let next = new Date(now);
-    
-    switch (frequency) {
-      case 'hourly':
-        next.setHours(now.getHours() + 1);
-        break;
-      case 'daily':
-        next.setDate(now.getDate() + 1);
-        next.setHours(8, 0, 0, 0);
-        break;
-      case 'weekly':
-        next.setDate(now.getDate() + 7);
-        next.setHours(8, 0, 0, 0);
-        break;
-      case 'manual':
-      default:
-        return null;
-    }
-    
-    return next.toISOString();
-  };
-  
+  // Update configuration
   const updateConfig = (newConfig: Partial<ScraperConfig>) => {
     setConfig(prev => {
       const updated = { ...prev, ...newConfig };
       
+      // If frequency changed, update next scheduled scrape
       if (newConfig.scheduleFrequency && newConfig.scheduleFrequency !== prev.scheduleFrequency) {
         setStatus(prevStatus => ({
           ...prevStatus,
@@ -201,6 +185,90 @@ export function useScraper({ initialConfig }: UseScraperProps = {}) {
     });
   };
   
+  // Handle publishing a single listing to Facebook
+  const publishListing = async (carId: string) => {
+    const car = cars.find(c => c.id === carId);
+    if (!car) {
+      toast({
+        title: "Error",
+        description: "Car listing not found",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    toast({
+      title: "Publishing to Facebook",
+      description: `Attempting to publish: ${car.title}`,
+    });
+    
+    try {
+      const result = await publishToFacebook(car);
+      
+      if (result.success && result.fbMarketplaceId) {
+        // Update the car with Facebook info
+        setCars(prevCars => {
+          return prevCars.map(c => {
+            if (c.id === carId) {
+              return {
+                ...c,
+                fbMarketplaceId: result.fbMarketplaceId,
+                fbMarketplaceUrl: result.fbMarketplaceUrl,
+              };
+            }
+            return c;
+          });
+        });
+        
+        toast({
+          title: "Published Successfully",
+          description: "Listing has been published to Facebook Marketplace",
+        });
+        
+        return true;
+      } else {
+        toast({
+          title: "Publishing Failed",
+          description: "Unable to publish to Facebook. Please try again.",
+          variant: "destructive",
+        });
+        
+        return false;
+      }
+    } catch (error) {
+      console.error('Error publishing to Facebook:', error);
+      
+      toast({
+        title: "Publishing Failed",
+        description: "An error occurred while publishing to Facebook",
+        variant: "destructive",
+      });
+      
+      return false;
+    }
+  };
+  
+  // Setup scheduler for automated scraping
+  useEffect(() => {
+    // If we have a nextScheduledScrape, set up a timer
+    if (status.nextScheduledScrape) {
+      const nextTime = new Date(status.nextScheduledScrape).getTime();
+      const now = new Date().getTime();
+      const delay = nextTime - now;
+      
+      if (delay > 0) {
+        // Schedule next scrape
+        const timerId = setTimeout(() => {
+          scrape();
+        }, delay);
+        
+        // Clean up timer on unmount or config change
+        return () => clearTimeout(timerId);
+      }
+    }
+  }, [status.nextScheduledScrape, config.scheduleFrequency]);
+  
+  // Initial setup
   useEffect(() => {
     if (initialConfig?.dealershipUrl) {
       setStatus(prev => ({
@@ -216,6 +284,7 @@ export function useScraper({ initialConfig }: UseScraperProps = {}) {
     status,
     cars,
     isLoading,
-    scrape: simulateScrape,
+    scrape,
+    publishListing,
   };
 }

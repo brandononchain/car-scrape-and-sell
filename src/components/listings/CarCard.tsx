@@ -6,11 +6,13 @@ import { cn } from '@/lib/utils';
 
 interface CarCardProps {
   car: CarListing;
-  onPublishToFB?: () => void;
+  onPublishToFB?: (carId: string) => Promise<boolean>;
+  isPublishing?: boolean;
 }
 
-export function CarCard({ car, onPublishToFB }: CarCardProps) {
+export function CarCard({ car, onPublishToFB, isPublishing = false }: CarCardProps) {
   const {
+    id,
     title,
     price,
     year,
@@ -28,6 +30,12 @@ export function CarCard({ car, onPublishToFB }: CarCardProps) {
     active: 'bg-green-100 text-green-800 border-green-200',
     sold: 'bg-rose-100 text-rose-800 border-rose-200',
     pending: 'bg-amber-100 text-amber-800 border-amber-200',
+  };
+  
+  const handlePublish = () => {
+    if (onPublishToFB) {
+      onPublishToFB(id);
+    }
   };
   
   return (
@@ -60,13 +68,14 @@ export function CarCard({ car, onPublishToFB }: CarCardProps) {
           </span>
         </div>
         
-        {status !== 'sold' && !fbMarketplaceUrl && (
+        {status !== 'sold' && !fbMarketplaceUrl && onPublishToFB && (
           <button
-            onClick={onPublishToFB}
-            className="absolute bottom-3 right-3 bg-primary hover:bg-primary/90 text-white text-xs font-medium px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-colors"
+            onClick={handlePublish}
+            disabled={isPublishing}
+            className="absolute bottom-3 right-3 bg-primary hover:bg-primary/90 text-white text-xs font-medium px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Facebook className="w-3.5 h-3.5" />
-            Publish
+            {isPublishing ? 'Publishing...' : 'Publish'}
           </button>
         )}
         

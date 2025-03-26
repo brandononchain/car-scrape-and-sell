@@ -22,6 +22,7 @@ const Index = () => {
     cars,
     isLoading,
     scrape,
+    publishListing,
   } = useScraper();
   
   const [sheetInfo, setSheetInfo] = useState<SheetInfo | null>(null);
@@ -29,7 +30,10 @@ const Index = () => {
   
   // Connect to Google Sheets
   const handleConnectSheet = (sheetId: string) => {
-    // This would typically be an API call to validate and connect to the sheet
+    // Update the scraper config with the sheet ID
+    updateConfig({ sheetsId: sheetId });
+    
+    // Store sheet info for display
     setSheetInfo({
       id: sheetId,
       name: 'Auto Scraper Data',
@@ -45,6 +49,8 @@ const Index = () => {
   
   // Disconnect from Google Sheets
   const handleDisconnectSheet = () => {
+    // Remove sheet ID from config
+    updateConfig({ sheetsId: undefined });
     setSheetInfo(null);
     
     toast({
@@ -55,7 +61,7 @@ const Index = () => {
   
   // Connect to Facebook
   const handleConnectFacebook = () => {
-    // This would typically involve OAuth flow with Facebook
+    // In a real app, this would involve OAuth flow with Facebook
     setFbAuth({
       isConnected: true,
       pageId: 'fb_page_123',
@@ -70,6 +76,8 @@ const Index = () => {
   
   // Disconnect from Facebook
   const handleDisconnectFacebook = () => {
+    // Update config to disable auto-publishing
+    updateConfig({ autoPublishToFb: false });
     setFbAuth(null);
     
     toast({
@@ -107,6 +115,20 @@ const Index = () => {
         description: `Found ${result.totalFound} vehicles (${result.new} new, ${result.updated} updated)`,
       });
     }
+  };
+  
+  // Publish a listing to Facebook
+  const handlePublishToFB = async (carId: string) => {
+    if (!fbAuth?.isConnected) {
+      toast({
+        title: 'Not Connected to Facebook',
+        description: 'Please connect to Facebook Marketplace first',
+        variant: 'destructive',
+      });
+      return false;
+    }
+    
+    return await publishListing(carId);
   };
   
   return (
@@ -160,7 +182,11 @@ const Index = () => {
               />
             </div>
             
-            <CarList cars={cars} isLoading={isLoading} />
+            <CarList 
+              cars={cars} 
+              isLoading={isLoading} 
+              onPublishToFB={fbAuth?.isConnected ? handlePublishToFB : undefined}
+            />
           </div>
         </Container>
       </motion.main>
