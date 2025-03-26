@@ -12,13 +12,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { type ScraperConfig } from '@/types';
 
+// Ensure this schema matches ScraperConfig
 const formSchema = z.object({
   dealershipUrl: z.string().url({ message: "Please enter a valid URL" }),
   scheduleFrequency: z.enum(['hourly', 'daily', 'weekly', 'manual']),
   autoPublishToFb: z.boolean(),
   includeImages: z.boolean(),
   maxListings: z.number().min(1).max(1000).optional(),
+  sheetsId: z.string().optional(),
 });
+
+type FormValues = z.infer<typeof formSchema>;
 
 interface ScrapeFormProps {
   onSubmit: (config: ScraperConfig) => void;
@@ -28,7 +32,7 @@ interface ScrapeFormProps {
 export function ScrapeForm({ onSubmit, isLoading = false }: ScrapeFormProps) {
   const [expandedOptions, setExpandedOptions] = useState(false);
   
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       dealershipUrl: '',
@@ -39,8 +43,19 @@ export function ScrapeForm({ onSubmit, isLoading = false }: ScrapeFormProps) {
     },
   });
 
-  function handleSubmit(values: z.infer<typeof formSchema>) {
-    onSubmit(values);
+  function handleSubmit(values: FormValues) {
+    // Convert the form values to ScraperConfig
+    // This ensures all required fields are present
+    const config: ScraperConfig = {
+      dealershipUrl: values.dealershipUrl,
+      scheduleFrequency: values.scheduleFrequency,
+      autoPublishToFb: values.autoPublishToFb,
+      includeImages: values.includeImages,
+      maxListings: values.maxListings,
+      sheetsId: values.sheetsId,
+    };
+    
+    onSubmit(config);
   }
 
   return (

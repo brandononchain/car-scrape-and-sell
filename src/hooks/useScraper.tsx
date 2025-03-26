@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { 
   type CarListing, 
@@ -18,6 +17,7 @@ export function useScraper({ initialConfig }: UseScraperProps = {}) {
     autoPublishToFb: initialConfig?.autoPublishToFb ?? true,
     includeImages: initialConfig?.includeImages ?? true,
     maxListings: initialConfig?.maxListings || 100,
+    sheetsId: initialConfig?.sheetsId,
   });
   
   const [status, setStatus] = useState<ScraperStatus>({
@@ -30,7 +30,6 @@ export function useScraper({ initialConfig }: UseScraperProps = {}) {
   const [cars, setCars] = useState<CarListing[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   
-  // Sample car data
   const sampleCars: CarListing[] = [
     {
       id: '1',
@@ -108,7 +107,6 @@ export function useScraper({ initialConfig }: UseScraperProps = {}) {
     },
   ];
   
-  // Simulate scraping process
   const simulateScrape = async () => {
     if (!config.dealershipUrl) {
       console.error('Dealership URL is required');
@@ -119,10 +117,8 @@ export function useScraper({ initialConfig }: UseScraperProps = {}) {
     setStatus(prev => ({ ...prev, isScrapingActive: true }));
     
     try {
-      // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Create a sample result
       const newCars = sampleCars.filter(car => !cars.some(c => c.id === car.id));
       setCars(prev => [...prev, ...newCars]);
       
@@ -135,7 +131,6 @@ export function useScraper({ initialConfig }: UseScraperProps = {}) {
         timestamp: new Date().toISOString(),
       };
       
-      // Update scraper status
       setStatus({
         isScrapingActive: false,
         lastScraped: new Date().toISOString(),
@@ -147,7 +142,6 @@ export function useScraper({ initialConfig }: UseScraperProps = {}) {
     } catch (error) {
       console.error('Error during scraping:', error);
       
-      // Update with error information
       setStatus(prev => ({
         ...prev,
         isScrapingActive: false,
@@ -168,7 +162,6 @@ export function useScraper({ initialConfig }: UseScraperProps = {}) {
     }
   };
   
-  // Calculate next scheduled time based on frequency
   const getNextScheduledTime = (frequency: ScraperConfig['scheduleFrequency']) => {
     const now = new Date();
     let next = new Date(now);
@@ -179,11 +172,11 @@ export function useScraper({ initialConfig }: UseScraperProps = {}) {
         break;
       case 'daily':
         next.setDate(now.getDate() + 1);
-        next.setHours(8, 0, 0, 0); // 8:00 AM
+        next.setHours(8, 0, 0, 0);
         break;
       case 'weekly':
         next.setDate(now.getDate() + 7);
-        next.setHours(8, 0, 0, 0); // 8:00 AM
+        next.setHours(8, 0, 0, 0);
         break;
       case 'manual':
       default:
@@ -193,12 +186,10 @@ export function useScraper({ initialConfig }: UseScraperProps = {}) {
     return next.toISOString();
   };
   
-  // Update configuration
   const updateConfig = (newConfig: Partial<ScraperConfig>) => {
     setConfig(prev => {
       const updated = { ...prev, ...newConfig };
       
-      // If frequency changed, update next scheduled scrape
       if (newConfig.scheduleFrequency && newConfig.scheduleFrequency !== prev.scheduleFrequency) {
         setStatus(prevStatus => ({
           ...prevStatus,
@@ -210,7 +201,6 @@ export function useScraper({ initialConfig }: UseScraperProps = {}) {
     });
   };
   
-  // Run initial setup
   useEffect(() => {
     if (initialConfig?.dealershipUrl) {
       setStatus(prev => ({
