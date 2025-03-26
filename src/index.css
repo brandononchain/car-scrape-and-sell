@@ -134,6 +134,11 @@
   .animate-delay-500 {
     animation-delay: 500ms;
   }
+  
+  /* Form styling improvements */
+  .form-switch-item {
+    @apply flex flex-row items-center justify-between p-4 rounded-lg border border-border bg-background/90 transition-colors hover:bg-background;
+  }
 }
 
 @layer components {

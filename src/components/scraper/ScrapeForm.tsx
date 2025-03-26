@@ -166,22 +166,23 @@ export function ScrapeForm({ onSubmit, isLoading = false }: ScrapeFormProps) {
                 control={form.control}
                 name="autoPublishToFb"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between p-4 rounded-lg border border-muted">
+                  <FormItem className="flex flex-row items-center justify-between p-4 rounded-lg border border-border bg-background">
                     <div className="space-y-0.5">
-                      <FormLabel className="flex items-center gap-2">
-                        <Facebook className="w-4 h-4 text-primary" />
+                      <FormLabel className="text-base font-medium">
                         Auto-Publish to Facebook
                       </FormLabel>
-                      <FormDescription>
+                      <FormDescription className="text-sm text-muted-foreground">
                         Automatically list new vehicles
                       </FormDescription>
                     </div>
-                    <FormControl>
-                      <Switch 
-                        checked={field.value} 
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
+                    <div className="flex items-center space-x-2">
+                      <FormControl>
+                        <Switch 
+                          checked={field.value} 
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </div>
                   </FormItem>
                 )}
               />
@@ -190,22 +191,23 @@ export function ScrapeForm({ onSubmit, isLoading = false }: ScrapeFormProps) {
                 control={form.control}
                 name="includeImages"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between p-4 rounded-lg border border-muted">
+                  <FormItem className="flex flex-row items-center justify-between p-4 rounded-lg border border-border bg-background">
                     <div className="space-y-0.5">
-                      <FormLabel className="flex items-center gap-2">
-                        <Image className="w-4 h-4 text-primary" />
+                      <FormLabel className="text-base font-medium">
                         Include Images
                       </FormLabel>
-                      <FormDescription>
+                      <FormDescription className="text-sm text-muted-foreground">
                         Download and include vehicle images
                       </FormDescription>
                     </div>
-                    <FormControl>
-                      <Switch 
-                        checked={field.value} 
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
+                    <div className="flex items-center space-x-2">
+                      <FormControl>
+                        <Switch 
+                          checked={field.value} 
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </div>
                   </FormItem>
                 )}
               />
