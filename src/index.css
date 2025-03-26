@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
@@ -182,7 +181,7 @@
 
   /* Toggle switch card */
   .toggle-card {
-    @apply flex flex-col p-4 rounded-lg border border-border bg-background;
+    @apply flex flex-col p-5 rounded-lg border border-border bg-background;
   }
 
   .toggle-card-header {
@@ -190,11 +189,10 @@
   }
 
   .toggle-card-footer {
-    @apply flex justify-end mt-auto pt-2;
+    @apply flex justify-end mt-auto pt-3;
   }
 }
 
-/* Custom breakpoint for extra-small devices */
 @media (min-width: 420px) {
   .xs\:inline {
     display: inline;

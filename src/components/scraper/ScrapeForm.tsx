@@ -1,10 +1,9 @@
-
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Globe, Clock, RefreshCw, Facebook, Image, ArrowRight } from 'lucide-react';
+import { Globe, Clock, RefreshCw, ArrowRight } from 'lucide-react';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { type ScraperConfig } from '@/types';
 
-// Ensure this schema matches ScraperConfig
 const formSchema = z.object({
   dealershipUrl: z.string().url({ message: "Please enter a valid URL" }),
   scheduleFrequency: z.enum(['hourly', 'daily', 'weekly', 'manual']),
@@ -44,8 +42,6 @@ export function ScrapeForm({ onSubmit, isLoading = false }: ScrapeFormProps) {
   });
 
   function handleSubmit(values: FormValues) {
-    // Convert the form values to ScraperConfig
-    // This ensures all required fields are present
     const config: ScraperConfig = {
       dealershipUrl: values.dealershipUrl,
       scheduleFrequency: values.scheduleFrequency,
@@ -166,17 +162,16 @@ export function ScrapeForm({ onSubmit, isLoading = false }: ScrapeFormProps) {
                 control={form.control}
                 name="autoPublishToFb"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col p-4 rounded-lg border border-border bg-background">
-                    <div className="space-y-1.5 mb-2">
-                      <FormLabel className="text-base font-medium flex items-center gap-2">
-                        <Facebook className="w-4 h-4 text-primary" />
+                  <FormItem className="toggle-card">
+                    <div className="toggle-card-header">
+                      <FormLabel className="text-base font-medium">
                         Auto-Publish to Facebook
                       </FormLabel>
                       <FormDescription className="text-sm text-muted-foreground">
                         Automatically list new vehicles to Facebook Marketplace
                       </FormDescription>
                     </div>
-                    <div className="flex justify-end mt-auto pt-2">
+                    <div className="toggle-card-footer">
                       <FormControl>
                         <Switch 
                           checked={field.value} 
@@ -192,17 +187,16 @@ export function ScrapeForm({ onSubmit, isLoading = false }: ScrapeFormProps) {
                 control={form.control}
                 name="includeImages"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col p-4 rounded-lg border border-border bg-background">
-                    <div className="space-y-1.5 mb-2">
-                      <FormLabel className="text-base font-medium flex items-center gap-2">
-                        <Image className="w-4 h-4 text-primary" />
+                  <FormItem className="toggle-card">
+                    <div className="toggle-card-header">
+                      <FormLabel className="text-base font-medium">
                         Include Images
                       </FormLabel>
                       <FormDescription className="text-sm text-muted-foreground">
                         Download and include vehicle images when scraping
                       </FormDescription>
                     </div>
-                    <div className="flex justify-end mt-auto pt-2">
+                    <div className="toggle-card-footer">
                       <FormControl>
                         <Switch 
                           checked={field.value} 
