@@ -137,7 +137,15 @@
   
   /* Form styling improvements */
   .form-switch-item {
-    @apply flex flex-row items-center justify-between p-4 rounded-lg border border-border bg-background/90 transition-colors hover:bg-background;
+    @apply flex flex-col p-4 rounded-lg border border-border bg-background/90 transition-colors hover:bg-background;
+  }
+
+  .form-switch-content {
+    @apply space-y-1.5 mb-2;
+  }
+
+  .form-switch-control {
+    @apply flex justify-end mt-auto pt-2;
   }
 }
 
@@ -170,6 +178,19 @@
   
   .responsive-paddings {
     @apply px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Toggle switch card */
+  .toggle-card {
+    @apply flex flex-col p-4 rounded-lg border border-border bg-background;
+  }
+
+  .toggle-card-header {
+    @apply space-y-1.5 mb-3;
+  }
+
+  .toggle-card-footer {
+    @apply flex justify-end mt-auto pt-2;
   }
 }
 

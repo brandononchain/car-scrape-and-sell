@@ -166,16 +166,17 @@ export function ScrapeForm({ onSubmit, isLoading = false }: ScrapeFormProps) {
                 control={form.control}
                 name="autoPublishToFb"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between p-4 rounded-lg border border-border bg-background">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base font-medium">
+                  <FormItem className="flex flex-col p-4 rounded-lg border border-border bg-background">
+                    <div className="space-y-1.5 mb-2">
+                      <FormLabel className="text-base font-medium flex items-center gap-2">
+                        <Facebook className="w-4 h-4 text-primary" />
                         Auto-Publish to Facebook
                       </FormLabel>
                       <FormDescription className="text-sm text-muted-foreground">
-                        Automatically list new vehicles
+                        Automatically list new vehicles to Facebook Marketplace
                       </FormDescription>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex justify-end mt-auto pt-2">
                       <FormControl>
                         <Switch 
                           checked={field.value} 
@@ -191,16 +192,17 @@ export function ScrapeForm({ onSubmit, isLoading = false }: ScrapeFormProps) {
                 control={form.control}
                 name="includeImages"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between p-4 rounded-lg border border-border bg-background">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base font-medium">
+                  <FormItem className="flex flex-col p-4 rounded-lg border border-border bg-background">
+                    <div className="space-y-1.5 mb-2">
+                      <FormLabel className="text-base font-medium flex items-center gap-2">
+                        <Image className="w-4 h-4 text-primary" />
                         Include Images
                       </FormLabel>
                       <FormDescription className="text-sm text-muted-foreground">
-                        Download and include vehicle images
+                        Download and include vehicle images when scraping
                       </FormDescription>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex justify-end mt-auto pt-2">
                       <FormControl>
                         <Switch 
                           checked={field.value} 
