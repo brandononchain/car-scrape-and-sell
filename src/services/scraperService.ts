@@ -2,7 +2,7 @@
 import { CarListing, ScraperConfig, ScrapeResult } from '@/types';
 
 // Base URL for our backend API
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 // This function calls our backend scraping service
 export async function scrapeWebsite(config: ScraperConfig): Promise<{

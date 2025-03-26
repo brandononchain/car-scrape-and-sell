@@ -14,7 +14,7 @@ The frontend is now configured to work with a real backend API that handles:
 
 ### API Configuration
 
-You need to set up a backend service that implements the following endpoints:
+The backend implements the following endpoints:
 
 - `/api/scrape` - POST endpoint for scraping dealership websites
 - `/api/sheets/sync` - POST endpoint for syncing with Google Sheets
@@ -31,20 +31,20 @@ You need to set up a backend service that implements the following endpoints:
 Set the following environment variable to point to your backend API:
 
 ```
-VITE_API_BASE_URL=https://your-backend-api.com
+VITE_API_BASE_URL=http://localhost:5000/api
 ```
 
-If not set, the app will default to `/api` which assumes the API is hosted on the same domain.
+If not set, the app will default to `http://localhost:5000/api` which assumes the API is running locally.
 
-## API Implementation Notes
+## API Implementation
 
-For the backend implementation, you'll need:
+The backend requires:
 
-1. **Web Scraper**: Use libraries like Puppeteer, Cheerio, or a dedicated scraping service
-2. **Google OAuth**: Set up OAuth 2.0 credentials in the Google Cloud Console
-3. **Google Sheets API**: Enable the Google Sheets API in your Google Cloud project
-4. **Facebook OAuth**: Register a Facebook App in the Facebook Developer Portal
-5. **Facebook Marketplace API**: Request access to the Marketplace API
+1. **Web Scraper**: Using Puppeteer and Cheerio for scraping websites
+2. **Google OAuth**: OAuth 2.0 with the Google Cloud Console
+3. **Google Sheets API**: Google Sheets API for data sync
+4. **Facebook OAuth**: OAuth with the Facebook Developer Portal
+5. **Facebook Marketplace API**: Commerce API for Marketplace listings
 
 ## Technology Stack
 
@@ -52,10 +52,14 @@ For the backend implementation, you'll need:
 - UI Components: Shadcn/UI
 - State Management: React Query
 - Animation: Framer Motion
+- Backend: Node.js, Express
+- Scraping: Puppeteer, Cheerio
 
 ## Important Considerations
 
-- Store API keys and secrets securely on the backend
+- Store API keys and secrets securely in environment variables
 - Implement proper rate limiting for scraping
 - Handle OAuth token refresh
 - Follow Facebook's policies for Marketplace listings
+- In production, use a database instead of in-memory storage
+
