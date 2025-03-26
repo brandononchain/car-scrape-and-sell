@@ -1,69 +1,83 @@
-# Welcome to your Lovable project
 
-## Project info
+# Auto Scraper & Marketplace Publisher
 
-**URL**: https://lovable.dev/projects/32a323d3-58cc-49c8-91b0-f862b7c0f679
+This application allows you to scrape vehicle listings from dealership websites and automatically publish them to Facebook Marketplace and Google Sheets.
 
-## How can I edit this code?
+## Setup Instructions
 
-There are several ways of editing your application.
+### 1. Backend Setup
 
-**Use Lovable**
+```bash
+# Navigate to the backend directory
+cd backend
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/32a323d3-58cc-49c8-91b0-f862b7c0f679) and start prompting.
+# Install dependencies
+npm install
 
-Changes made via Lovable will be committed automatically to this repo.
+# Configure environment variables
+# Copy the example env file and update with your API keys
+cp .env.example .env
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start the backend server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### 2. Frontend Setup
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+# In the root directory, install frontend dependencies
+npm install
 
-**Use GitHub Codespaces**
+# Start the frontend development server
+npm run dev
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Environment Configuration
 
-## What technologies are used for this project?
+#### Backend (.env file)
+Required environment variables:
+- `PORT`: Port for the server to listen on (default: 5000)
+- `SESSION_SECRET`: Secret for Express session
+- `FACEBOOK_APP_ID`: Facebook App ID from Facebook Developer Portal
+- `FACEBOOK_APP_SECRET`: Facebook App Secret
+- `FACEBOOK_REDIRECT_URI`: Redirect URI for Facebook OAuth
+- `GOOGLE_CLIENT_ID`: Google Client ID from Google Cloud Console
+- `GOOGLE_CLIENT_SECRET`: Google Client Secret
+- `GOOGLE_REDIRECT_URI`: Redirect URI for Google OAuth
+- `FRONTEND_URL`: Your frontend URL for CORS (default: http://localhost:8080)
 
-This project is built with .
+#### Frontend (.env file)
+- `VITE_API_BASE_URL`: URL of your backend API (default: http://localhost:5000/api)
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### API Services
 
-## How can I deploy this project?
+The backend implements services for:
+1. Web scraping of dealership sites
+2. Google Sheets integration
+3. Facebook Marketplace publishing
+4. OAuth authentication for both services
 
-Simply open [Lovable](https://lovable.dev/projects/32a323d3-58cc-49c8-91b0-f862b7c0f679) and click on Share -> Publish.
+### OAuth Setup
 
-## I want to use a custom domain - is that possible?
+#### Facebook Developer Setup
+1. Create a Facebook Developer account at https://developers.facebook.com/
+2. Create a new App with the "Business" type
+3. Add the "Facebook Login" product
+4. Configure the OAuth redirect URL to match your FACEBOOK_REDIRECT_URI
+5. For full Marketplace access, apply for Commerce API access
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+#### Google Cloud Setup
+1. Go to https://console.cloud.google.com/
+2. Create a new project
+3. Enable the Google Sheets API and Google Drive API
+4. Create OAuth 2.0 credentials
+5. Configure the redirect URI to match your GOOGLE_REDIRECT_URI
+6. Enable scopes for Google Sheets and Drive
+
+### Operating the Application
+
+1. Start both frontend and backend servers
+2. Configure scraper settings in the web interface
+3. Authenticate with Google to enable sheet sync
+4. Authenticate with Facebook to enable Marketplace publishing
+5. Start scraping dealership websites

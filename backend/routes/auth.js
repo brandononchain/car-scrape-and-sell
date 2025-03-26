@@ -1,19 +1,30 @@
 
 const express = require('express');
 const router = express.Router();
-const { initGoogleAuth, googleCallback, googleStatus, disconnectGoogle } = require('../controllers/googleAuthController');
-const { initFacebookAuth, facebookCallback, facebookStatus, disconnectFacebook } = require('../controllers/facebookAuthController');
+const { 
+  initiateFacebookAuth, 
+  facebookCallback, 
+  getFacebookAuthStatus, 
+  disconnectFacebook 
+} = require('../controllers/facebookAuthController');
 
-// Google OAuth routes
-router.get('/google/init', initGoogleAuth);
-router.get('/google/callback', googleCallback);
-router.get('/google/status', googleStatus);
-router.post('/google/disconnect', disconnectGoogle);
+const { 
+  initiateGoogleAuth, 
+  googleCallback, 
+  getGoogleAuthStatus, 
+  disconnectGoogle 
+} = require('../controllers/googleAuthController');
 
-// Facebook OAuth routes
-router.get('/facebook/init', initFacebookAuth);
+// Facebook auth routes
+router.get('/facebook/init', initiateFacebookAuth);
 router.get('/facebook/callback', facebookCallback);
-router.get('/facebook/status', facebookStatus);
+router.get('/facebook/status', getFacebookAuthStatus);
 router.post('/facebook/disconnect', disconnectFacebook);
+
+// Google auth routes
+router.get('/google/init', initiateGoogleAuth);
+router.get('/google/callback', googleCallback);
+router.get('/google/status', getGoogleAuthStatus);
+router.post('/google/disconnect', disconnectGoogle);
 
 module.exports = router;
