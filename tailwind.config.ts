@@ -13,12 +13,25 @@ export default {
 	theme: {
 		container: {
 			center: true,
-			padding: '2rem',
+			padding: {
+				DEFAULT: '1rem',
+				sm: '2rem',
+				lg: '4rem',
+				xl: '5rem',
+				'2xl': '6rem',
+			},
 			screens: {
-				'2xl': '1400px'
+				sm: '640px',
+				md: '768px',
+				lg: '1024px',
+				xl: '1280px',
+				'2xl': '1536px',
 			}
 		},
 		extend: {
+			screens: {
+				'xs': '420px',
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -131,6 +144,8 @@ export default {
 			boxShadow: {
 				'glass': '0 4px 30px rgba(0, 0, 0, 0.05)',
 				'subtle': '0 2px 10px rgba(0, 0, 0, 0.03)',
+				'card': '0 4px 12px rgba(0, 0, 0, 0.05)',
+				'hover': '0 6px 24px rgba(0, 0, 0, 0.08)',
 			},
 			backdropBlur: {
 				'xs': '2px',

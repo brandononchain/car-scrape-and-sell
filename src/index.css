@@ -140,4 +140,41 @@
   .shimmer {
     @apply bg-gradient-to-r from-transparent via-white/20 to-transparent bg-[length:200%_100%] animate-shimmer;
   }
+  
+  /* Responsive typography */
+  .heading-1 {
+    @apply text-2xl sm:text-3xl font-bold;
+  }
+  
+  .heading-2 {
+    @apply text-xl sm:text-2xl font-semibold;
+  }
+  
+  .heading-3 {
+    @apply text-lg sm:text-xl font-medium;
+  }
+  
+  /* Card and container styles */
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-md hover:border-primary/20;
+  }
+  
+  .responsive-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6;
+  }
+  
+  .responsive-paddings {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+}
+
+/* Custom breakpoint for extra-small devices */
+@media (min-width: 420px) {
+  .xs\:inline {
+    display: inline;
+  }
+  
+  .xs\:hidden {
+    display: none;
+  }
 }

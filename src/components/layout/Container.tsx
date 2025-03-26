@@ -23,7 +23,7 @@ export function Container({
   children,
   className,
   maxWidth = 'xl',
-  padding = 'px-4 sm:px-6 py-4',
+  padding = 'px-4 sm:px-6 lg:px-8 py-4 md:py-6',
 }: ContainerProps) {
   return (
     <div
